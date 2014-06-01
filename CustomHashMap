@@ -1,0 +1,245 @@
+import java.util.*;
+
+class HashMap   //Creating a hash map based on hash function that points to the proper bucket. 
+{
+	class Link   //Creation of link of a Linked List or Bucket
+{
+	private String K;
+	public String V;
+	public Link next;
+	
+	public Link (String k, String v) 
+	{
+		K = k;
+		V= v;
+	}
+	public String getKey()
+	{
+		return K;
+	}
+	
+	public String getVal()
+	{
+		return V;
+	}
+}
+class Bucket   // Sorted linklist i.e Bucket. Sorted so that it would take less time to search in the list
+{
+	 private Link first;
+	
+	 public  Bucket ()
+	 {
+		 first = null;
+	 }
+    public boolean isNotFilled()       // true if bucket is empty
+     {
+     return (first==null);
+     }
+	 
+	 
+	 public void insert(Link theLink) // insert in the bucket the Link i.e (Key,Value) pair in sorted order (Sorting based on keys)
+	 {
+		String key = theLink.getKey();
+		Link previous = null;
+		Link current = first;
+		
+		while (current!=null && (key.compareTo(current.getKey()))>0 ) //sorting
+				
+		{
+			previous = current;
+			current = current.next;
+		}
+		if (previous == null)
+			first = theLink;
+		else
+		{
+			
+		 previous.next = theLink;
+			
+		}
+
+if ((current!=null) && (theLink.getKey().equals(current.getKey())) )  // Removing duplicate values
+			
+	   theLink.next = current.next;
+		else
+				
+		theLink.next = current;
+		
+		
+	 }
+	 
+		 public void delete(String key) //removing Link i.e (Key,Value) pair from the bucket
+	 {
+		 
+		 if(isNotFilled()) // checking if bucket is empty
+		 		return;
+		 else
+		 {
+		 Link previous = null;
+		 Link current = first;
+		 
+		 while((current!=null) &&   (key.equals(current.getKey()) == false ))
+		 {
+			 previous = current;
+			 current = current.next;
+		 }
+		 
+		 if (previous == null)
+		     first = first.next;
+		 else
+			 previous.next = current.next;
+		 }
+	 }
+	 
+	 public Link find (String key) //searching for Link i.e (Key,Value) in a bucket
+	 {
+		 Link current = first;
+
+
+		 while (current!=null && key.equals(current.getKey()) != true )  
+			{
+			 
+			 if (current.next==null)
+				 return null;
+			else
+
+			 current = current.next;
+		    }
+    return current;
+    }
+
+public String showkey()  // give back all the key values stored the all the buckets
+	 {
+		 
+		 Link current = first;
+		 String s="";
+		 while (current!=null)
+		 {
+        s= s+" "+current.getKey();
+		 current =current.next;
+		 }
+		 s.replaceAll("\\s+","");
+		 return s.trim();
+	 }
+}
+	private Bucket [] hashArray; // declare an array of Buckets
+	private int arraySize;      //arraysize of the size of the hashmap
+	
+	public HashMap(int size)
+	{
+		arraySize = size;
+		hashArray = new Bucket [size];
+		
+		for (int i=0;i<arraySize ;i++)
+		{
+			hashArray[i] = new Bucket();
+		}
+	}
+public List<String> keySet() //keySet function
+	{
+		
+		List<String> keyList = new ArrayList<String>();
+		for (int i=0;i<arraySize;i++)
+		{
+			if (hashArray[i].showkey()!=null)
+				
+				keyList.add(hashArray[i].showkey());
+	    }
+		
+      keyList.removeAll(Arrays.asList("",null)); // get rid of the blank values in keySet
+		
+		return keyList;
+	}
+	
+	public int hashFunc(String key)  //hash function. returns the hashvalue
+	{
+		
+		if (key==null)
+		{
+			int h =0;
+			return h;
+		}
+		else
+		{
+		int sum = 0;
+		for(int i=0;i<key.length();i++)
+		{
+			sum = sum+ key.charAt(i);
+		}
+	 return sum%arraySize;
+		}
+	}
+	
+	public void put (String key, String value)
+	{
+		int hashVal;
+		if (key!=null)
+	  {
+		key = key.trim(); // to get rid of trailing white spaces
+		hashVal = hashFunc(key);
+	   }
+	    else
+	    {
+	     key="null";
+	     hashVal=0;
+        
+	    }
+		Link theLink = new Link(key,value);
+
+		hashArray[hashVal].insert(theLink); // uses the insert function defined in bucket 
+	
+	}
+	
+	public void remove(String key)
+	{
+		int hashVal;
+		if (key==null)
+		{
+			hashVal =0;
+		    key="null";
+		}
+       else
+       	hashVal = hashFunc(key);
+
+		hashArray[hashVal].delete(key);
+	}
+public String get (String key)
+	{
+       int hashVal;
+		if (key==null)
+		{
+			hashVal=0;
+			key="null";
+
+		}
+		else
+             hashVal = hashFunc(key);
+		
+		Link theLink = hashArray[hashVal].find(key);  // uses find function of bucket to search for the key
+
+		if (theLink!=null)
+			return theLink.V;
+		else
+			return null;
+
+   }
+
+   public boolean isEmpty()  //isEmpty function 
+   {
+   	boolean flag = true;
+   	for (int i=0;i<arraySize;i++)
+   	{
+              if(hashArray[i].isNotFilled()==true)  //uses isNotFilled function to check if bucket is empty
+              	  flag =true;
+              	else
+              	{
+              	flag =false;
+              	break;
+              }
+
+              
+
+   	}
+   	return flag;
+   }
+}
